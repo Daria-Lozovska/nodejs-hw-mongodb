@@ -1,6 +1,6 @@
 import { getAllContacts, getContactById } from '../services/contacts.js';
 
-const getContacts = async (req, res) => {
+export const getContacts = async (req, res) => {
   try {
     const contacts = await getAllContacts();
     res.json({ status: 200, message: 'Successfully found contacts!', data: contacts });
@@ -9,7 +9,7 @@ const getContacts = async (req, res) => {
   }
 };
 
-const getContact = async (req, res) => {
+export const getContact = async (req, res) => {
   try {
     const contact = await getContactById(req.params.contactId);
     if (!contact) {
@@ -20,7 +20,3 @@ const getContact = async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 };
-
-export { getContacts, getContact };
-
-
