@@ -11,6 +11,11 @@ const setupServer = () => {
   app.use(cors());
   app.use(express.json());
 
+  // Редірект з кореня на /contacts
+  app.get('/', (req, res) => {
+    res.redirect('/contacts');
+  });
+
   app.use('/contacts', contactsRouter);
 
   app.use((req, res) => {
