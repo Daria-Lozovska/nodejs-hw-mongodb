@@ -15,6 +15,9 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 app.use("/contacts", contactsRouter);
+app.get("/", (req, res) => {
+  res.send("Contact Book API is running 🧩");
+});
 app.use(notFoundHandler);
 app.use(errorHandler);
 
