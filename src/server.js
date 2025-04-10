@@ -1,30 +1,28 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import process from 'process';
-import contactsRouter from './routes/contacts.js'; 
-
+import express from "express";
+import cors from "cors";
+import morgan from "morgan";
+import dotenv from "dotenv";
 dotenv.config();
 
+import contactsRouter from "./routes/contacts.js";
+import errorHandler from "./middlewares/errorHandler.js";
+import notFoundHandler from "./middlewares/notFoundHandler.js";
+
+const app = express();
+
+app.use(cors());
+app.use(morgan("dev"));
+app.use(express.json());
+
+app.use("/contacts", contactsRouter);
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 3000;
+
 const setupServer = () => {
-  const app = express();
-  app.use(cors());
-  app.use(express.json());
-
-  // Редірект з кореня на /contacts
-  app.get('/', (req, res) => {
-    res.redirect('/contacts');
-  });
-
-  app.use('/contacts', contactsRouter);
-
-  app.use((req, res) => {
-    res.status(404).json({ message: 'Not found' });
-  });
-
-  const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`✅ Server running on port ${PORT}`);
   });
 };
 

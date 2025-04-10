@@ -1,22 +1,46 @@
-import { getAllContacts, getContactById } from '../services/contacts.js';
+import createError from "http-errors";
+import {
+  getAllContacts,
+  getContactById,
+  createContact,
+  updateContact,
+  deleteContact,
+} from "../services/contacts.js";
 
 export const getContacts = async (req, res) => {
-  try {
-    const contacts = await getAllContacts();
-    res.json({ status: 200, message: 'Successfully found contacts!', data: contacts });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
-  }
+  const contacts = await getAllContacts();
+  res.json({ status: 200, data: contacts });
 };
 
 export const getContact = async (req, res) => {
-  try {
-    const contact = await getContactById(req.params.contactId);
-    if (!contact) {
-      return res.status(404).json({ message: 'Contact not found' });
-    }
-    res.json({ status: 200, message: `Successfully found contact with id ${req.params.contactId}!`, data: contact });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
-  }
+  const contact = await getContactById(req.params.contactId);
+  if (!contact) throw createError(404, "Contact not found");
+  res.json({ status: 200, data: contact });
+};
+
+export const addContact = async (req, res) => {
+  const contact = await createContact(req.body);
+  res.status(201).json({
+    status: 201,
+    message: "Successfully created a contact!",
+    data: contact,
+  });
+};
+
+export const patchContact = async (req, res) => {
+  const contact = await updateContact(req.params.contactId, req.body);
+  if (!contact) throw createError(404, "Contact not found");
+
+  res.json({
+    status: 200,
+    message: "Successfully patched a contact!",
+    data: contact,
+  });
+};
+
+export const removeContact = async (req, res) => {
+  const contact = await deleteContact(req.params.contactId);
+  if (!contact) throw createError(404, "Contact not found");
+
+  res.status(204).send();
 };
