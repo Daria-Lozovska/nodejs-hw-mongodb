@@ -16,7 +16,7 @@ app.use(express.json());
 
 app.use("/contacts", contactsRouter);
 app.get("/", (req, res) => {
-  res.send("Contact Book API is running 🧩");
+  res.redirect("/contacts");
 });
 app.use(notFoundHandler);
 app.use(errorHandler);
