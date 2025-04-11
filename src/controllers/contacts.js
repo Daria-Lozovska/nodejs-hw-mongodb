@@ -9,13 +9,13 @@ import {
 
 export const getContacts = async (req, res) => {
   const contacts = await getAllContacts();
-  res.json({ status: 200, data: contacts });
+  res.json({ status: 200, message: "Successfully fetched contacts!", data: contacts });
 };
 
 export const getContact = async (req, res) => {
   const contact = await getContactById(req.params.contactId);
   if (!contact) throw createError(404, "Contact not found");
-  res.json({ status: 200, data: contact });
+  res.json({ status: 200, message: "Successfully fetched contact!", data: contact });
 };
 
 export const addContact = async (req, res) => {
