@@ -1,6 +1,6 @@
-import Contact from "../models/contact.js"
+import Contact from "../models/contact.js";
 
-const getAllContacts = async ({ page = 1, perPage = 10, sortBy = 'name', sortOrder = 'asc', filters = {} }) => {
+export const getAllContacts = async ({ page = 1, perPage = 10, sortBy = 'name', sortOrder = 'asc', filters = {} }) => {
   const skip = (page - 1) * perPage;
   const sortOption = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
 
@@ -21,4 +21,12 @@ const getAllContacts = async ({ page = 1, perPage = 10, sortBy = 'name', sortOrd
   };
 };
 
-export default getAllContacts;
+export const getContactById = (id) => Contact.findById(id);
+
+export const createContact = (data) => Contact.create(data);
+
+export const updateContact = (id, data) =>
+  Contact.findByIdAndUpdate(id, data, { new: true });
+
+export const deleteContact = (id) => Contact.findByIdAndDelete(id);
+
