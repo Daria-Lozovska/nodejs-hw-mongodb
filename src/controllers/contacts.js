@@ -1,4 +1,4 @@
-import { getAllContacts } from "../services/contacts.js"
+import getAllContacts from "../services/contacts.js"
 
 const getContacts = async (req, res) => {
   const { page = 1, perPage = 10, sortBy = 'name', sortOrder = 'asc', type, isFavourite } = req.query;
