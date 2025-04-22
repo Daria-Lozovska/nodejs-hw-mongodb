@@ -1,32 +1,25 @@
 import express from "express";
-import cors from "cors";
-import morgan from "morgan";
-import dotenv from "dotenv";
-dotenv.config();
-
+import cookieParser from "cookie-parser";
+import authRouter from "./routes/auth.js";
 import contactsRouter from "./routes/contacts.js";
-import errorHandler from "./middlewares/errorHandler.js";
-import notFoundHandler from "./middlewares/notFoundHandler.js";
 
-const app = express();
+export const setupServer = () => {
+  const app = express();
 
-app.use(cors());
-app.use(morgan("dev"));
-app.use(express.json());
+  app.use(express.json());
+  app.use(cookieParser());
 
-app.use("/contacts", contactsRouter);
-app.get("/", (req, res) => {
-  res.redirect("/contacts");
-});
-app.use(notFoundHandler);
-app.use(errorHandler);
+  app.use("/auth", authRouter);
+  app.use("/contacts", contactsRouter);
 
-const PORT = process.env.PORT || 3000;
+  app.use((err, req, res, next) => {
+    res.status(err.status || 500).json({
+      status: err.status || 500,
+      message: err.message || "Server error",
+    });
+  });
 
-const setupServer = () => {
-  app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
+  app.listen(process.env.PORT, () => {
+    console.log(`🚀 Server running on port ${process.env.PORT}`);
   });
 };
-
-export default setupServer;
