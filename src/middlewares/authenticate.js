@@ -12,16 +12,12 @@ const authenticate = async (req, res, next) => {
 
     const decoded = jwt.verify(token, ACCESS_SECRET);
     const user = await User.findById(decoded.userId);
-    if (!user) throw createError(401, "Invalid token");
+    if (!user || user.token !== token) throw createError(401, "Not authorized");
 
     req.user = user;
     next();
   } catch (err) {
-    if (err.name === "TokenExpiredError") {
-      next(createError(401, "Access token expired"));
-    } else {
-      next(createError(401, err.message));
-    }
+    next(createError(401, "Invalid or expired token"));
   }
 };
 

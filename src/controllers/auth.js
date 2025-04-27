@@ -1,21 +1,24 @@
-import * as authService from "../services/auth.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import createError from "http-errors";
+import User from "../models/user.js";
+
+const { ACCESS_SECRET } = process.env;
 
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
-    const user = await authService.register({ name, email, password });
+    const { email, password } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) throw createError(409, "Email already in use");
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = await User.create({ email, passwordHash });
 
     res.status(201).json({
       status: 201,
-      message: "Successfully registered a user!",
-      data: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
+      message: "User registered successfully",
+      data: { email: user.email },
     });
   } catch (err) {
     next(err);
@@ -25,46 +28,23 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const { accessToken, refreshToken } = await authService.login({ email, password });
 
-    res
-      .cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      })
-      .status(200)
-      .json({
-        status: 200,
-        message: "Successfully logged in an user!",
-        data: { accessToken },
-      });
-  } catch (err) {
-    next(err);
-  }
-};
+    const user = await User.findOne({ email });
+    if (!user) throw createError(401, "Invalid credentials");
 
-export const refresh = async (req, res, next) => {
-  try {
-    const { refreshToken } = req.cookies;
-    if (!refreshToken) throw createError(401, "Refresh token missing");
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isPasswordValid) throw createError(401, "Invalid credentials");
 
-    const { accessToken, newRefreshToken } = await authService.refresh(refreshToken);
+    const token = jwt.sign({ userId: user._id }, ACCESS_SECRET, { expiresIn: "1h" });
+    user.token = token;
+    await user.save();
 
-    res
-      .cookie("refreshToken", newRefreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-      })
-      .status(200)
-      .json({
-        status: 200,
-        message: "Successfully refreshed a session!",
-        data: { accessToken },
-      });
+    res.status(200).json({
+      status: 200,
+      message: "Login successful",
+      token,
+      user: { email: user.email },
+    });
   } catch (err) {
     next(err);
   }
@@ -72,10 +52,25 @@ export const refresh = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
   try {
-    const { refreshToken } = req.cookies;
-    if (refreshToken) await authService.logout(refreshToken);
+    const user = await User.findById(req.user._id);
+    if (!user) throw createError(401, "Not authorized");
 
-    res.clearCookie("refreshToken").status(204).send();
+    user.token = null;
+    await user.save();
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const currentUser = async (req, res, next) => {
+  try {
+    const { email } = req.user;
+    res.status(200).json({
+      status: 200,
+      data: { email },
+    });
   } catch (err) {
     next(err);
   }

@@ -10,20 +10,7 @@ import createError from "http-errors";
 // GET /contacts
 export const getContacts = async (req, res, next) => {
   try {
-    const { page = 1, perPage = 10, sortBy = 'name', sortOrder = 'asc', type, isFavourite } = req.query;
-
-    const filters = { userId: req.user._id };
-    if (type) filters.contactType = type;
-    if (isFavourite !== undefined) filters.isFavourite = isFavourite === "true";
-
-    const result = await getAllContacts({
-      page: Number(page),
-      perPage: Number(perPage),
-      sortBy,
-      sortOrder,
-      filters,
-    });
-
+    const result = await getAllContacts(req.user._id);
     res.status(200).json({
       status: 200,
       message: "Successfully found contacts!",
@@ -65,7 +52,7 @@ export const addContact = async (req, res, next) => {
   }
 };
 
-// PUT /contacts/:id
+// PATCH /contacts/:id
 export const updateContactById = async (req, res, next) => {
   try {
     const updated = await updateContact(req.params.id, req.user._id, req.body);
