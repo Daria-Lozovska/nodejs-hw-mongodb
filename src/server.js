@@ -15,6 +15,11 @@ export const setupServer = () => {
   app.use(cors());
   app.use(express.json());
 
+  // Health check route for Render or basic test
+  app.get("/", (req, res) => {
+    res.status(200).json({ status: "ok", message: "Your service is live 🎉" });
+  });
+
   // Routes
   app.use("/auth", authRouter);
   app.use("/contacts", contactsRouter);
