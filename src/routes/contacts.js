@@ -3,19 +3,18 @@ import {
   getContacts,
   getContact,
   addContact,
-  updateContactById,
-  deleteContactById,
+  updateContact,
+  deleteContact
 } from "../controllers/contacts.js";
 import authenticate from "../middlewares/authenticate.js";
 
 const router = express.Router();
 
 router.use(authenticate);
-
-router.get("/", getContacts);                  // GET /contacts
-router.get("/:id", getContact);                 // GET /contacts/:id
-router.post("/", addContact);                   // POST /contacts
-router.patch("/:id", updateContactById);         // PATCH /contacts/:id
-router.delete("/:id", deleteContactById);        // DELETE /contacts/:id
+router.get("/", getContacts);
+router.get("/:id", getContact);
+router.post("/", addContact);
+router.put("/:id", updateContact);
+router.delete("/:id", deleteContact);
 
 export default router;

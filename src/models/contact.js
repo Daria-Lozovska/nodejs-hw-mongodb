@@ -1,13 +1,10 @@
 import mongoose from "mongoose";
 
-const contactSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    phoneNumber: { type: String, required: true },
-    email: { type: String, default: null },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  },
-  { timestamps: true }
-);
+const contactSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: String,
+  phone: String,
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
 
 export default mongoose.model("Contact", contactSchema);

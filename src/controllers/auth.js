@@ -3,23 +3,18 @@ import jwt from "jsonwebtoken";
 import createError from "http-errors";
 import User from "../models/user.js";
 
-const { ACCESS_SECRET } = process.env;
+const { ACCESS_SECRET, REFRESH_SECRET } = process.env;
 
 export const register = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { name, email, password } = req.body;
+    const userExists = await User.findOne({ email });
+    if (userExists) throw createError(409, "Email already in use");
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) throw createError(409, "Email already in use");
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await User.create({ name, email, password: hashedPassword });
 
-    const passwordHash = await bcrypt.hash(password, 10);
-    const user = await User.create({ email, passwordHash });
-
-    res.status(201).json({
-      status: 201,
-      message: "User registered successfully",
-      data: { email: user.email },
-    });
+    res.status(201).json({ status: 201, message: "User registered", data: { id: newUser._id } });
   } catch (err) {
     next(err);
   }
@@ -28,50 +23,35 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-
     const user = await User.findOne({ email });
-    if (!user) throw createError(401, "Invalid credentials");
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw createError(401, "Email or password is wrong");
+    }
 
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isPasswordValid) throw createError(401, "Invalid credentials");
+    const payload = { userId: user._id };
+    const accessToken = jwt.sign(payload, ACCESS_SECRET, { expiresIn: "15m" });
+    const refreshToken = jwt.sign(payload, REFRESH_SECRET, { expiresIn: "7d" });
 
-    const token = jwt.sign({ userId: user._id }, ACCESS_SECRET, { expiresIn: "1h" });
-    user.token = token;
-    await user.save();
-
-    res.status(200).json({
-      status: 200,
-      message: "Login successful",
-      token,
-      user: { email: user.email },
-    });
+    res.status(200).json({ status: 200, message: "Login successful", data: { accessToken, refreshToken } });
   } catch (err) {
     next(err);
   }
 };
 
 export const logout = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.user._id);
-    if (!user) throw createError(401, "Not authorized");
-
-    user.token = null;
-    await user.save();
-
-    res.status(204).send();
-  } catch (err) {
-    next(err);
-  }
+  res.status(204).json({ message: "Logged out successfully" });
 };
 
-export const currentUser = async (req, res, next) => {
+export const refresh = async (req, res, next) => {
   try {
-    const { email } = req.user;
-    res.status(200).json({
-      status: 200,
-      data: { email },
-    });
+    const { refreshToken } = req.body;
+    if (!refreshToken) throw createError(401, "Refresh token required");
+
+    const payload = jwt.verify(refreshToken, REFRESH_SECRET);
+    const accessToken = jwt.sign({ userId: payload.userId }, ACCESS_SECRET, { expiresIn: "15m" });
+
+    res.status(200).json({ accessToken });
   } catch (err) {
-    next(err);
+    next(createError(401, "Invalid or expired refresh token"));
   }
 };
