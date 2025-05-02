@@ -1,18 +1,17 @@
-import jwt from "jsonwebtoken";
-import createError from "http-errors";
+import jwt from 'jsonwebtoken';
 
-const { ACCESS_SECRET } = process.env;
+const authenticate = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ message: 'Unauthorized' });
 
-export default (req, res, next) => {
+  const token = authHeader.split(' ')[1];
   try {
-    const authHeader = req.headers.authorization || "";
-    const token = authHeader.replace("Bearer ", "");
-    if (!token) throw createError(401, "Not authorized");
-
-    const payload = jwt.verify(token, ACCESS_SECRET);
-    req.user = { _id: payload.userId };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = { id: decoded.userId };
     next();
   } catch (err) {
-    next(createError(401, "Invalid or expired token"));
+    res.status(401).json({ message: 'Invalid token' });
   }
 };
+
+export default authenticate;
