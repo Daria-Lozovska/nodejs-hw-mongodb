@@ -14,6 +14,10 @@ app.use(cookieParser());
 
 app.use('/auth', authRouter);
 app.use('/contacts', contactsRouter);
+app.get('/', (req, res) => {
+  res.send('Welcome to Contacts API');
+});
+
 
 app.use(notFoundHandler);
 app.use(errorHandler);
