@@ -1,13 +1,12 @@
-import createError from "http-errors";
+import createHttpError from 'http-errors';
 
-const validateBody = (schema) => {
+export const validateBody = (schema) => {
   return (req, res, next) => {
     const { error } = schema.validate(req.body);
     if (error) {
-      return next(createError(400, error.message));
+      next(createHttpError(400, error.message));
+    } else {
+      next();
     }
-    next();
   };
 };
-
-export default validateBody;
