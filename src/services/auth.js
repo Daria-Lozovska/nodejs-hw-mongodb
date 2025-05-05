@@ -28,7 +28,7 @@ export const login = async ({ email, password }) => {
   const accessTokenValidUntil = new Date(Date.now() + 15 * 60 * 1000);
   const refreshTokenValidUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-  await Session.create({
+  const session = await Session.create({
     userId: user._id,
     accessToken,
     refreshToken,
@@ -36,13 +36,17 @@ export const login = async ({ email, password }) => {
     refreshTokenValidUntil,
   });
 
-  return { accessToken, refreshToken };
+  return {
+    accessToken,
+    refreshToken,
+    sessionId: session._id.toString(),
+  };
 };
 
 export const refresh = async (refreshToken) => {
   const session = await Session.findOne({ refreshToken });
   if (!session || session.refreshTokenValidUntil < Date.now()) {
-    throw createHttpError(401, 'Invalid refresh token');
+    throw createHttpError(401, 'Invalid or expired refresh token');
   }
 
   await Session.deleteOne({ _id: session._id });
@@ -52,7 +56,7 @@ export const refresh = async (refreshToken) => {
   const accessTokenValidUntil = new Date(Date.now() + 15 * 60 * 1000);
   const refreshTokenValidUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-  await Session.create({
+  const newSession = await Session.create({
     userId: session.userId,
     accessToken,
     refreshToken: newRefreshToken,
@@ -60,7 +64,11 @@ export const refresh = async (refreshToken) => {
     refreshTokenValidUntil,
   });
 
-  return { accessToken, refreshToken: newRefreshToken };
+  return {
+    accessToken,
+    refreshToken: newRefreshToken,
+    sessionId: newSession._id.toString(),
+  };
 };
 
 export const logout = async (refreshToken) => {
