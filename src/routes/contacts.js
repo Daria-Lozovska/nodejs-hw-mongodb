@@ -7,12 +7,13 @@ import {
   deleteContact,
   updateContact,
 } from '../controllers/contacts.js';
+import ctrlWrapper from '../utils/ctrlWrapper.js';
 
 const router = express.Router();
 
 router.use(authenticate); 
 
-router.get('/', getAllContacts);
+router.get('/', ctrlWrapper(getAllContacts));
 router.get('/:id', getContactById);
 router.post('/', addContact);
 router.delete('/:id', deleteContact);

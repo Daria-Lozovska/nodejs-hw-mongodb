@@ -1,24 +1,45 @@
+import jwt from 'jsonwebtoken';
 import createHttpError from 'http-errors';
-import Session from '../models/session.js';
 import User from '../models/user.js';
+import Session from '../models/session.js';
 
 const authenticate = async (req, res, next) => {
-  const authHeader = req.headers.authorization || '';
-  const token = authHeader.replace('Bearer ', '');
+  try {
+    const authHeader = req.headers.authorization || '';
+    const [type, token] = authHeader.split(' ');
 
-  if (!token) return next(createHttpError(401, 'Access token missing'));
+    if (type !== 'Bearer' || !token) {
+      throw createHttpError(401, 'Not authorized');
+    }
 
-  const session = await Session.findOne({ accessToken: token });
+    const payload = jwt.verify(token, process.env.ACCESS_SECRET);
 
-  if (!session) return next(createHttpError(401, 'Invalid access token'));
-  if (session.accessTokenValidUntil < new Date())
-    return next(createHttpError(401, 'Access token expired'));
+    const session = await Session.findOne({
+      userId: payload.id,
+      accessToken: token,
+    });
 
-  const user = await User.findById(session.userId);
-  if (!user) return next(createHttpError(401, 'User not found'));
+    if (!session) {
+      throw createHttpError(401, 'Invalid session');
+    }
 
-  req.user = user;
-  next();
+    if (new Date(session.accessTokenValidUntil) < new Date()) {
+      throw createHttpError(401, 'Access token expired');
+    }
+
+    const user = await User.findById(payload.id);
+    if (!user) {
+      throw createHttpError(401, 'User not found');
+    }
+
+    req.user = user;
+    req.token = token;
+    req.session = session;
+
+    next();
+  } catch (err) {
+    next(createHttpError(401, err.message));
+  }
 };
 
 export default authenticate;
