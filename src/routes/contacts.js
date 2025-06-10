@@ -8,15 +8,17 @@ import {
   updateContact,
 } from '../controllers/contacts.js';
 import ctrlWrapper from '../utils/ctrlWrapper.js';
+import {validateBody} from "../utils/validateBody.js";
+import {createContactSchema, updateContactSchema} from "../schemas/contactValidation.js";
 
 const router = express.Router();
 
 router.use(authenticate); 
 
 router.get('/', ctrlWrapper(getAllContacts));
-router.get('/:id', getContactById);
-router.post('/', addContact);
-router.delete('/:id', deleteContact);
-router.patch('/:id', updateContact);
+router.get('/:id', ctrlWrapper(getContactById));
+router.post('/', validateBody(createContactSchema), ctrlWrapper(addContact));
+router.delete('/:id', ctrlWrapper(deleteContact));
+router.patch('/:id',validateBody(updateContactSchema), ctrlWrapper(updateContact));
 
 export default router;
