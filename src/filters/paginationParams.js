@@ -8,7 +8,7 @@ const Number = (value, defaultValue) => {
     return parsedValue;
 }
 
-export const PaginationParams = ({page, perPage}) => {
+const paginationParams = ({page, perPage}) => {
     const parsedPage = Number(page, 1);
     const parsedPerPage = Number(perPage, 10);
 
@@ -17,3 +17,5 @@ export const PaginationParams = ({page, perPage}) => {
         perPage: parsedPerPage,
     }
 }
+
+export default paginationParams

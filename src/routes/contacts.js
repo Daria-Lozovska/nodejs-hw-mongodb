@@ -7,10 +7,10 @@ import {
     patchContactController,
     upsertContactController
 } from "../controllers/contacts.js";
-import {ctrlWrapper} from "../utils/ctrlWrapper.js";
-import {validateBody} from "../schemas/contactValidation.js";
+import ctrlWrapper from "../utils/ctrlWrapper.js";
+import validateBody from "../middlewares/validateBody.js";
 import {addContactSchema, updateContactSchema} from "../schemas/contactValidation.js";
-import {isValidId} from "../middlewares/isValidId.js";
+import isValidId from "../middlewares/isValidId.js";
 import {authenticate} from "../middlewares/authenticate.js";
 
 const contactsRouter = Router();

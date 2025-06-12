@@ -1,7 +1,7 @@
 import {Router} from "express";
-import {validateBody} from "../schemas/authValidation.js";
+import validateBody from "../middlewares/validateBody.js";
 import {authLoginSchema, authRegistrationSchema} from "../schemas/authValidation.js";
-import {ctrlWrapper} from "../utils/ctrlWrapper.js";
+import ctrlWrapper from "../utils/ctrlWrapper.js";
 import {loginController, logoutController, refreshController, registerUserController} from "../controllers/auth.js";
 
 const authRouter = Router();

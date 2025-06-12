@@ -4,7 +4,7 @@ import {getEnvVariable} from "../utils/getEnvVariable.js";
 export const initMongoCollection = async () => {
     const password = getEnvVariable('MONGODB_PASSWORD')
     const user = getEnvVariable('MONGODB_USER')
-    const url = getEnvVariable('MONGODB_URI')
+    const url = getEnvVariable('MONGODB_URL')
     const db = getEnvVariable('MONGODB_DB')
     try {
     await mongoose.connect(`mongodb+srv://${user}:${password}@${url}/${db}?retryWrites=true&w=majority&appName=Cluster0`)
