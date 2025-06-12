@@ -1,81 +1,101 @@
-import * as contactsService from '../services/contacts.js';
+import {addContact, deleteContact, getContactById, getContacts, updateContact} from "../services/contacts.js";
+import createHttpError from "http-errors";
+import {parsePaginationParams} from "../filters/paginationParams.js";
+import {sortParams} from "../filters/sortParams.js";
+import {contactsSortFields} from "../models/contact.js";
+import contactsFilterParams from "../filters/contactsFilterParams.js"
 
-export const getAllContacts = async (req, res, next) => {
-  try {
-    const { contacts, total, page, limit } = await contactsService.listContacts(req.user.id, req.query);
-    res.status(200).json({
-      status: '200',
-      message: 'Contacts retrieved successfully',
-      data: {
-        contacts,
-        total,
-        page,
-        limit,
-      },
+export const getContactsController = async (req, res) => {
+    const paginationParams = parsePaginationParams(req.query);
+    const sortParams = sortParams(req.query, contactsSortFields);
+    const filters = contactsFilterParams(req.query);
+    filters.userId = req.user._id
+    const data = await getContacts({...paginationParams, ...sortParams, filters});
+
+    if (!data) {
+        throw createHttpError(400, "Could not find contacts");
+    }
+
+    res.json({
+        status: 200,
+        message: "Successfully found contacts!",
+        data,
     });
-  } catch (error) {
-    next(error);
-  }
-};
+}
 
-export const getContactById = async (req, res, next) => {
-  try {
-    const contact = await contactsService.getContactById(req.params.id, req.user.id);
-    res.status(200).json({
-      status: '200',
-      message: 'Contact retrieved successfully',
-      data: contact,
+export const getContactByIdController = async (req, res) => {
+    const {id} = req.params;
+    const userId = req.user._id;
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+        throw createHttpError(404, `Invalid ID format. Must be a 24-character hex string.`);
+    }
+    console.log(userId);
+    const data = await getContactById(id, userId);
+
+    if (!data) {
+        throw createHttpError(404, `Could not find ${id}`);
+    }
+
+    res.json({
+        status: 200,
+        message: `Successfully found contact with id ${id}!`,
+        data,
     });
-  } catch (error) {
-    next(error);
-  }
-};
+}
 
-export const addContact = async (req, res, next) => {
-  try {
-    const newContact = await contactsService.addContact(req.body, req.user.id);
+export const addContactController = async (req, res, next) => {
+    const {_id: userId} = req.user;
+
+    const data = await addContact({...req.body, userId});
+
     res.status(201).json({
-      status: '201',
-      message: 'Contact created successfully',
-      data: newContact,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+        status: 201,
+        message: "Successfully created a contact!",
+        data,
+    })
+}
 
-export const updateContact = async (req, res, next) => {
-  try {
-    const updatedContact = await contactsService.updateContact(req.params.id, req.body, req.user.id);
+export const upsertContactController = async (req, res) => {
+    const {id} = req.params;
+    const userId = req.user._id;
+    const data = await updateContact(id, userId, req.body)
+
     res.status(200).json({
-      status: '200',
-      message: 'Contact updated successfully',
-      data: updatedContact,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+        status: 200,
+        message: "Successfully upserted contact!",
+        data,
+    })
+}
 
-export const deleteContact = async (req, res, next) => {
-  try {
-    await contactsService.removeContact(req.params.id, req.user.id);
-    res.status(204).send();
-  } catch (error) {
-    next(error);
-  }
-};
+export const patchContactController = async (req, res) => {
+    const {id} = req.params;
+    const userId = req.user._id;
+    const data = await updateContact(id, userId, req.body);
 
-export const logoutController = async (req, res, next) => {
-  try {
-    const { refreshToken } = req.cookies;
-    await contactsService.logout(refreshToken);
-    res.clearCookie('refreshToken');
+    if (!data) {
+        throw createHttpError(404, `Contact not found`);
+    }
+
     res.status(200).json({
-      status: '200',
-      message: 'Successfully logged out!',
-    });
-  } catch (err) {
-    next(err);
-  }
-};
+        status: 200,
+        message: "Successfully patched a contact!",
+        data,
+    })
+}
+
+export const deleteContactController = async (req, res) => {
+    const {id} = req.params;
+    const userId = req.user._id;
+
+    const data = await deleteContact(id, userId);
+
+    if (!data) {
+        throw createHttpError(404, `Contact not found`);
+    }
+
+    res.status(204).json({
+        status: 204,
+        message: "Successfully deleted contact!",
+        data,
+    })
+}

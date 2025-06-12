@@ -1,11 +1,11 @@
-export const errorHandler = (err, req, res, next) => {
-  console.error(err); 
+import createHttpError from "http-errors";
 
-  const status = err.status || 500;
-  const message = err.message || 'Internal Server Error';
-
-  res.status(status).json({
-    status: 'error',
-    message,
-  });
+export const errorHandler = (error, req, res, next) => {
+    const {status = 500, message} = error;
+    res.status(status).json({
+        status,
+        message,
+    })
 };
+
+export default createHttpError

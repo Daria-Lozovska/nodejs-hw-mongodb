@@ -1,3 +1,3 @@
 export const typeList = ['work', 'home', 'personal']
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/ 
-export default emailRegex;
+export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/ 
+export const sortList = ['asc', 'desc'];

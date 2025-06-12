@@ -1,25 +1,40 @@
-import mongoose from "mongoose";
-import { typeList } from "../constans/index.js";
-import { Schema } from "mongoose";
+import {model, Schema} from "mongoose";
+import {typeList} from "../constans/index.js";
+import {handleServerError, setUpdateSettings} from "../middlewares/hooks.js";
 
-const contactSchema = new mongoose.Schema(
-    {
-        userId: {
-            type: Schema.Types.ObjectId,
-            ref: "User",
-            required: true
-        },
-        name: {type: String, required: true},
-        phoneNumber: {type: String, required: true},
-        email: String,
-        isFavourite: Boolean,
-        contactType: {type: String, required: true, enum: typeList, default: 'personal'},
+const contactSchema = new Schema({
+    name: {
+        type: String,
+        required: true,
     },
-    {
-        timestamps: true,
-    }
-);
+    phoneNumber: {
+        type: String,
+        required: true,
+    },
+    email: {
+        type: String,
+    },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
+    isFavourite: {
+        type: Boolean,
+        default: false,
+    },
+    contactType: {
+        type: String,
+        enum: typeList,
+        default: 'personal',
+    },
+}, {timestamps: true});
 
-const Contact = mongoose.model("Contact", contactSchema);
+contactSchema.post('save', handleServerError);
+contactSchema.pre('findOneAndUpdate', setUpdateSettings)
+contactSchema.post('findOneAndUpdate', handleServerError);
+export const contactsSortFields = ['name', 'phoneNumber', 'email', 'isFavourite', 'contactType', 'age'];
 
-export default Contact;
+const ContactCollection = model("contact", contactSchema);
+
+export default ContactCollection;

@@ -1,46 +1,35 @@
-import jwt from 'jsonwebtoken';
-import createHttpError from 'http-errors';
-import User from '../models/user.js';
-import Session from '../models/session.js';
+import createHttpError from "http-errors";
+import {findSession, findUser} from "../services/auth.js";
 
-const authenticate = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization || '';
-    const [type, token] = authHeader.split(' ');
-
-    if (type !== 'Bearer' || !token) {
-      throw createHttpError(401, 'Not authorized');
+export const authenticate = async (req, res, next) => {
+    const authorization = req.get('Authorization');
+    if (!authorization) {
+        return next(createHttpError(401, 'Authorization token is required'));
     }
 
-    const payload = jwt.verify(token, process.env.ACCESS_SECRET);
+    const [bearer, accessToken] = authorization.split(' ');
 
-    const session = await Session.findOne({
-      userId: payload.id,
-      accessToken: token,
-    });
+    if (bearer !== 'Bearer') {
+        return next(createHttpError(401, 'Header must be a Bearer'));
+    }
+
+    const session = await findSession({accessToken});
 
     if (!session) {
-      throw createHttpError(401, 'Invalid session');
+        return next(createHttpError(401, 'Session not found'));
     }
 
-    if (new Date(session.accessTokenValidUntil) < new Date()) {
-      throw createHttpError(401, 'Access token expired');
+    if (session.accessTokenValidUntil < Date.now()) {
+        return next(createHttpError(401, 'Session token is expired'));
     }
 
-    const user = await User.findById(payload.id);
+    const user = await findUser({_id: session.userId});
+
     if (!user) {
-      throw createHttpError(401, 'User not found');
+        return next(createHttpError(401, 'User not found'));
     }
 
     req.user = user;
-    req.token = token;
-    req.session = session;
 
-    next();
-  } catch (err) {
-    next(createHttpError(401, err.message));
-  }
-};
-
-export default authenticate;
-
+    next()
+}

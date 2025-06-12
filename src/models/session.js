@@ -1,13 +1,34 @@
-import mongoose from 'mongoose';
+import {model, Schema} from "mongoose";
+import {handleServerError, setUpdateSettings} from "../middlewares/hooks.js";
 
-const sessionSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  accessToken: { type: String, required: true },
-  refreshToken: { type: String, required: true },
-  accessTokenValidUntil: { type: Date, required: true },
-  refreshTokenValidUntil: { type: Date, required: true },
-});
+const sessionSchema = new Schema({
+    userId: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: 'users',
+    },
+    accessToken: {
+        type: String,
+        required: true,
+    },
+    refreshToken: {
+        type: String,
+        required: true,
+    },
+    accessTokenValidUntil: {
+        type: Date,
+        required: true,
+    },
+    refreshTokenValidUntil: {
+        type: Date,
+        required: true,
+    },
+}, {timestamps: true, versionKey: false});
 
-const Session = mongoose.model('Session', sessionSchema);
+sessionSchema.post('save', handleServerError);
+sessionSchema.pre('findOneAndUpdate', setUpdateSettings)
+sessionSchema.post('findOneAndUpdate', handleServerError);
 
-export default Session;
+const SessionCollection = model('session', sessionSchema);
+
+export default SessionCollection;
