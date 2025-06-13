@@ -6,11 +6,11 @@ import contactsFilterParams from "../filters/contactsFilterParams.js"
 import sortParams from "../filters/sortParams.js";
 
 export const getContactsController = async (req, res) => {
-    const paginationParams = paginationParams(req.query);
-    const sortParams = sortParams(req.query, contactsSortFields);
+    const pagination = paginationParams(req.query);
+    const sort = sortParams(req.query, contactsSortFields);
     const filters = contactsFilterParams(req.query);
     filters.userId = req.user._id
-    const data = await getContacts({...paginationParams, ...sortParams, filters});
+    const data = await getContacts({...pagination, ...sort, filters});
 
     if (!data) {
         throw createHttpError(400, "Could not find contacts");

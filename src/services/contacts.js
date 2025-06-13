@@ -34,10 +34,10 @@ export const getContacts = async ({page = 1, perPage = 10, sortBy = '_id', sortO
 
     const totalItems = await ContactCollection.countDocuments(query);
 
-    const paginationData = paginationData({page, perPage, totalItems});
+    const pagination = paginationData({page, perPage, totalItems});
 
     return {
-        data: items, page, perPage, totalItems, ...paginationData,
+        data: items, page, perPage, totalItems, ...pagination,
     };
 }
 
