@@ -1,4 +1,4 @@
-const Number = (value, defaultValue) => {
+const paramsNumber = (value, defaultValue) => {
     if (typeof value !== 'string' ) return defaultValue;
 
     const parsedValue = parseInt(value);
@@ -9,8 +9,8 @@ const Number = (value, defaultValue) => {
 }
 
 const paginationParams = ({page, perPage}) => {
-    const parsedPage = Number(page, 1);
-    const parsedPerPage = Number(perPage, 10);
+    const parsedPage = paramsNumber(page, 1);
+    const parsedPerPage = paramsNumber(perPage, 10);
 
     return {
         page: parsedPage,
@@ -18,4 +18,4 @@ const paginationParams = ({page, perPage}) => {
     }
 }
 
-export default paginationParams
+export default paginationParams 
