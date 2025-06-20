@@ -1,9 +1,9 @@
-import initMongoConnection from "./db/initMongoConnection.js";
-import { setupServer } from "./server.js"; 
+import { initMongoCollection } from "./db/initMongoConnection.js";
+import { startServer } from "./server.js"; 
 
 const startApp = async () => {
-  await initMongoConnection();
-  setupServer();
+  await initMongoCollection();
+  startServer();
 };
 
 startApp();
