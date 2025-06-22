@@ -1,5 +1,6 @@
-import cloudinary from "cloudinary";
-import {getEnvVariable} from "./getEnvVariable.js";
+import { v2 as cloudinary } from 'cloudinary';
+import { getEnvVariable } from "./getEnvVariable.js";
+import fs from 'fs/promises';
 
 cloudinary.config({
     cloud_name: getEnvVariable("CLOUDINARY_CLOUD_NAME"),
@@ -8,6 +9,7 @@ cloudinary.config({
 });
 
 export const saveToCloudinary = async (file) => {
-    const response = await cloudinary.v2.uploader.upload(file.path);
+    const response = await cloudinary.uploader.upload(file.path);
+    await fs.unlink(file.path);
     return response.secure_url
 }

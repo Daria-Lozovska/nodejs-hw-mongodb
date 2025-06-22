@@ -161,9 +161,11 @@ export const resetPassword = async email => {
             html,
         }
 
+        console.log('Reset token:', token);
         await sendEmail(resetPassword);
         return email;
     } catch (error) {
+      console.error("Error while sending reset password email:", error);
         throw createHttpError(500, error.message);
     }
 }

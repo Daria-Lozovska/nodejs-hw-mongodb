@@ -21,6 +21,9 @@ export async function sendEmail(data) {
     try {
         await transporter.sendMail({...data, from});
     } catch (error) {
+        console.error('SMTP full error object:', error);        // усе, що повернув nodemailer
+        console.error('SMTP response:', error?.response);
+        console.error('Email sending error:', error);
         throw createHttpError(500, 'Failed to send the email, please try again later.');
     }
 }
