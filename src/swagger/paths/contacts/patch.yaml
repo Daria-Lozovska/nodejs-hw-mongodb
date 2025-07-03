@@ -1,20 +1,25 @@
+patch:
 tags:
   - Contacts
-summary: Add a new contact
-operationId: AddContact
-description: Creates a new contact and optionally uploads a photo to Cloudinary
+summary: Patch contact by ID
+operationId: PatchContact
+description: Update specific contact fields by ID
 security:
   - bearerAuth: []
+parameters:
+  - in: path
+    name: id
+    required: true
+    schema:
+      type: string
+      format: uuid
+    description: Contact ID
 requestBody:
-  required: true
+  required: false
   content:
     multipart/form-data:
       schema:
         type: object
-        required:
-          - name
-          - phoneNumber
-          - email
         properties:
           name:
             type: string
@@ -26,37 +31,33 @@ requestBody:
             type: string
             format: email
             example: voronkinvladimir328@gmail.com
+          isFavourite:
+            type: boolean
+            example: true
           contactType:
             type: string
             enum: [work, home, personal]
-            example: personal
-          isFavourite:
-            type: boolean
-            example: false
+            example: home
           photo:
             type: string
             format: binary
 responses:
-  '201':
-    description: Successfully created a contact
+  '200':
+    description: Contact successfully updated
     content:
       application/json:
         schema:
           type: object
-          required:
-            - status
-            - message
-            - data
           properties:
             status:
               type: integer
-              example: 201
+              example: 200
             message:
               type: string
-              example: Successfully created a contact!
+              example: Successfully patched a contact!
             data:
               $ref: '../../component/contact.yaml'
-  '400':
-    description: Invalid input
+  '404':
+    $ref: '../../statuses/404.yaml'
   '401':
     $ref: '../../statuses/401.yaml'

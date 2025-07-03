@@ -9,6 +9,7 @@ import contactsRouter from "./routes/contacts.js";
 import authRouter from "./routes/auth.js";
 import cookieParser from "cookie-parser";
 import {UPLOADS_FILES_DIR} from "./constants/index.js";
+import {swaggerDocs} from "./middlewares/swaggerDocs.js";
 
 dotenv.config();
 export const startServer = () => {
@@ -19,15 +20,17 @@ export const startServer = () => {
     app.use(express.json());
     app.use(logger)
 
-    app.get("/", (req, res) => {
+    app.get("/ping", (req, res) => {
         res.json({
-            message: "API is working!",
+            message: "Pong!",
         })
     })
     app.use('/uploads', express.static(UPLOADS_FILES_DIR))
 
     app.use('/auth', authRouter);
     app.use('/contacts', contactsRouter);
+
+    app.use('/api-docs', swaggerDocs())
 
     app.use(notFoundHandler)
 

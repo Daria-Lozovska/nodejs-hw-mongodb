@@ -11,26 +11,26 @@ tags:
     description: Operations about contacts
 servers:
   - url: http://localhost:3000
-  - url: https://nodejs-hw-mongodb-884o.onrender.com
+  - url: https://nodejs-hw-mongodb-5-18p1.onrender.com/
 paths:
   /contacts:
     get:
-      $ref: '../swagger/paths/contacts/get.yaml'
+      $ref: '../src/swagger/paths/contacts/get.yaml'
     post:
-      $ref: '../swagger/paths/contacts/post.yaml'
+      $ref: '../src/swagger/paths/contacts/post.yaml'
   /contacts/:contactId:
     get:
-      $ref: '../swagger/paths/contacts/{id}/get.yaml'
+      $ref: '../src/swagger/paths/contacts/{id}/get.yaml'
     patch:
-      $ref: '../swagger/paths/contacts/patch.yaml'
+      $ref: '../src/swagger/paths/contacts/patch.yaml'
     delete:
-      $ref: '../swagger/paths/contacts/delete.yaml'
+      $ref: '../src/swagger/paths/contacts/delete.yaml'
   /auth/register:
     post:
-      $ref: '../swagger/paths/auth/register.yaml'
+      $ref: '../src/swagger/paths/auth/register.yaml'
   /auth/login:
     post:
-      $ref: '../swagger/paths/auth/login.yaml'
+      $ref: '../src/swagger/paths/auth/login.yaml'
 components:
   securitySchemes:
     bearerAuth:
