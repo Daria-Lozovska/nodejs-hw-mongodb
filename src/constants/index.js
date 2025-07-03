@@ -14,3 +14,4 @@ export const refreshTokenLifeTime = 1000 * 60 * 60 * 24 * 30;
 
 export const typeList = ['work', 'home', 'personal']
 
+export const SWAGGER_PATH = path.resolve('docs', 'swagger.json');
