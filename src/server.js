@@ -20,9 +20,9 @@ export const startServer = () => {
     app.use(express.json());
     app.use(logger)
 
-    app.get("/ping", (req, res) => {
+    app.get("/", (req, res) => {
         res.json({
-            message: "Pong!",
+            message: "API is working",
         })
     })
     app.use('/uploads', express.static(UPLOADS_FILES_DIR))
