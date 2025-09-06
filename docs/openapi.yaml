@@ -1,0 +1,38 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: Contacts Store
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  description: CRUD For contacts list
+tags:
+  - name: Contacts
+    description: Operations about contacts
+servers:
+  - url: http://localhost:3000
+  - url: https://nodejs-hw-mongodb-5-18p1.onrender.com/
+paths:
+  /contacts:
+    get:
+      $ref: '../src/swagger/paths/contacts/get.yaml'
+    post:
+      $ref: '../src/swagger/paths/contacts/post.yaml'
+  /contacts/:contactId:
+    get:
+      $ref: '../src/swagger/paths/contacts/{id}/get.yaml'
+    patch:
+      $ref: '../src/swagger/paths/contacts/patch.yaml'
+    delete:
+      $ref: '../src/swagger/paths/contacts/delete.yaml'
+  /auth/register:
+    post:
+      $ref: '../src/swagger/paths/auth/register.yaml'
+  /auth/login:
+    post:
+      $ref: '../src/swagger/paths/auth/login.yaml'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
